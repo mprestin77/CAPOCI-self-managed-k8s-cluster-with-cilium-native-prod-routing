@@ -1,0 +1,162 @@
+apiVersion: cluster.x-k8s.io/v1beta1
+kind: Cluster
+metadata:
+    name: "${CLUSTER_NAME}"
+    namespace: "${NAMESPACE}"
+    labels:
+      cluster.x-k8s.io/cluster-name: "${CLUSTER_NAME}"
+spec:
+    clusterNetwork:
+      pods:
+        cidrBlocks:
+          - "${CLUSTER_POD_CIDR:=10.0.120.0/24}"
+      services:
+        cidrBlocks:
+          - "${SERVICE_CIDR:=10.128.0.0/12}"
+      serviceDomain: "${SERVICE_DOMAIN:=cluster.local}"
+    infrastructureRef:
+      apiVersion: infrastructure.cluster.x-k8s.io/v1beta2
+      kind: OCICluster
+      name: "${CLUSTER_NAME}"
+      namespace: "${NAMESPACE}"
+    controlPlaneRef:
+      apiVersion: controlplane.cluster.x-k8s.io/v1beta1
+      kind: KubeadmControlPlane
+      name: "${CLUSTER_NAME}-control-plane"
+      namespace: "${NAMESPACE}"
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta2
+kind: OCICluster
+metadata:
+    name: "${CLUSTER_NAME}"
+    namespace: "${NAMESPACE}"
+    labels:
+      cluster.x-k8s.io/cluster-name: "${CLUSTER_NAME}"
+spec:
+    compartmentId: "${COMPUTE_COMPARTMENT_ID}"
+    networkSpec:
+      skipNetworkManagement: true
+      vcn:
+        id: "${VCN_ID}"
+        subnets:
+          - id: "${SUBNET_CONTROL_PLANE_ENDPOINT_ID}"
+            name: "control-plane-endpoint"
+            role: "control-plane-endpoint"
+          - id: "${SUBNET_CONTROL_PLANE_ID}"
+            name: "control-plane"
+            role: "control-plane"
+          - id: "${SUBNET_WORKER_ID}"
+            name: "worker"
+            role: "worker"
+---
+apiVersion: controlplane.cluster.x-k8s.io/v1beta1
+kind: KubeadmControlPlane
+metadata:
+    name: "${CLUSTER_NAME}-control-plane"
+    namespace: "${NAMESPACE}"
+spec:
+    version: "${KUBERNETES_VERSION}"
+    replicas: ${CONTROL_PLANE_MACHINE_COUNT:=1}
+    machineTemplate:
+      infrastructureRef:
+        apiVersion: infrastructure.cluster.x-k8s.io/v1beta2
+        kind: OCIMachineTemplate
+        name: "${CLUSTER_NAME}-control-plane"
+        namespace: "${NAMESPACE}"
+    kubeadmConfigSpec:
+      clusterConfiguration:
+        kubernetesVersion: "${KUBERNETES_VERSION}"
+        apiServer:
+          certSANs:
+            - "127.0.0.1"
+            - "localhost"
+        controllerManager: {}
+        scheduler: {}
+        dns: {}
+        etcd: {}
+        networking: {}
+      initConfiguration:
+        nodeRegistration:
+          criSocket: /var/run/containerd/containerd.sock
+          kubeletExtraArgs:
+            cloud-provider: external
+            provider-id: oci://{{ ds["id"] }}
+      joinConfiguration:
+        discovery: {}
+        nodeRegistration:
+          criSocket: /var/run/containerd/containerd.sock
+          kubeletExtraArgs:
+            cloud-provider: external
+            provider-id: oci://{{ ds["id"] }}
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta2
+kind: OCIMachineTemplate
+metadata:
+    name: "${CLUSTER_NAME}-control-plane"
+    namespace: "${NAMESPACE}"
+spec:
+    template:
+      spec:
+        compartmentId: "${COMPUTE_COMPARTMENT_ID}"
+        imageId: "${OCI_IMAGE_ID}"
+        shape: "${OCI_CONTROL_PLANE_MACHINE_TYPE:=VM.Standard.E5.Flex}"
+        shapeConfig:
+          ocpus: "${OCI_CONTROL_PLANE_MACHINE_TYPE_OCPUS:=1}"
+        metadata:
+          ssh_authorized_keys: "${OCI_SSH_KEY}"
+        isPvEncryptionInTransitEnabled: ${OCI_CONTROL_PLANE_PV_TRANSIT_ENCRYPTION:=true}
+---
+apiVersion: bootstrap.cluster.x-k8s.io/v1beta2
+kind: KubeadmConfig
+metadata:
+    name: "${CLUSTER_NAME}-mp-0"
+    namespace: default
+spec:
+    joinConfiguration:
+      nodeRegistration:
+        criSocket: /var/run/containerd/containerd.sock
+        kubeletExtraArgs:
+        - name: cloud-provider
+          value: external
+        - name: provider-id
+          value: oci://{{ ds["id"] }}
+---
+apiVersion: cluster.x-k8s.io/v1beta2
+kind: MachinePool
+metadata:
+    name: "${CLUSTER_NAME}-mp-0"
+    namespace: default
+spec:
+    clusterName: "${CLUSTER_NAME}"
+    replicas: ${WORKER_MACHINE_COUNT}
+    template:
+      spec:
+        bootstrap:
+          configRef:
+            apiGroup: bootstrap.cluster.x-k8s.io
+            kind: KubeadmConfig
+            name: "${CLUSTER_NAME}-mp-0"
+        clusterName: "${CLUSTER_NAME}"
+        infrastructureRef:
+          apiGroup: infrastructure.cluster.x-k8s.io
+          kind: OCIMachinePool
+          name: "${CLUSTER_NAME}-mp-0"
+        version: "${KUBERNETES_VERSION}"
+
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta2
+kind: OCIMachinePool
+metadata:
+    name: "${CLUSTER_NAME}-mp-0"
+    namespace: default
+spec:
+    instanceConfiguration:
+      instanceSourceViaImageConfig:
+        imageId: "${OCI_IMAGE_ID}"
+      shape: "${OCI_NODE_MACHINE_TYPE=VM.Standard.E5.Flex}"
+      shapeConfig:
+        ocpus: "${OCI_NODE_MACHINE_TYPE_OCPUS:=1}"
+        memoryInGBs: "${OCI_NODE_MACHINE_TYPE_MEMORY_IN_GBS:=16}"
+      metadata:
+        ssh_authorized_keys: "${OCI_SSH_KEY}"
+        flexcidr-primary-vnic: '{"cidr-blocks":["${OCI_MACHINE_POOL_CIDR_BLOCKS}"],"ip-count":${OCI_MACHINE_POOL_IP_COUNT}}'
