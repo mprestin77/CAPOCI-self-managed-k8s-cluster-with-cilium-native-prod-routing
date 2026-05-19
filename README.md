@@ -68,7 +68,7 @@ Main variables used by `cluster-template.yaml`:
 
 - `CLUSTER_NAME`
 - `NAMESPACE`
-- `COMPUTE_COMPARTMENT_ID`
+- `COMPARTMENT_ID`
 - `OCI_IMAGE_ID`
 - `KUBERNETES_VERSION`
 - `VCN_ID`
@@ -83,8 +83,7 @@ Main variables used by `cluster-template.yaml`:
 Example:
 
 ```bash
-COMPUTE_COMPARTMENT_ID=<compute-compartment-ocid> \
-NETWORK_COMPARTMENT_ID=<network-compartment-ocid> \
+COMPARTMENT_ID=<cluster-compartment-ocid> \
 OCI_SSH_KEY="$(cat <path to SSH public key>)" \
 KUBERNETES_VERSION=v1.34.3 \
 OCI_IMAGE_ID=<image-ocid> \
@@ -164,6 +163,14 @@ test-control-plane-lg2rd    NotReady   control-plane   6m37s   v1.34.3
 The nodes are configured with `cloud-provider: external`, so OCI CCM must be installed before the cluster becomes fully initialized.
 
 Note: OCI FlexCIDR provider was included in OCI CCM `v1.33.1-rc3`. It is expected to be merged into a regular OCI CCM release in the future, but at the time of writing you need to use the release-candidate image from `ghcr.io/akarshes/cloud-provider-oci-amd64:v1.33.1-rc3`.
+
+Download the upstream OCI CCM provider-config template and save it locally as `cloud-provider.yaml`:
+
+```bash
+curl -L https://raw.githubusercontent.com/oracle/oci-cloud-controller-manager/master/manifests/provider-config-example.yaml -o cloud-provider.yaml
+```
+
+Then update `cloud-provider.yaml` for your environment. For this guide, set `useInstancePrincipals: true` and customize the OCIDs for `compartment`, `vcn`, `loadBalancer.subnet1`, and `loadBalancer.subnet2`. If you are explicitly managing security lists through the OCI CCM config, also populate the `securityLists` mapping with your subnet and security list OCIDs.
 
 Create the OCI CCM secret first:
 
@@ -268,7 +275,7 @@ In this example, Cilium is installed only on worker nodes, using the label `cili
 The worker nodes are already labeled by `cluster-template.yaml`. You can verify that with:
 
 ```bash
-ks get nodes --show-labels
+kubectl get nodes --show-labels
 ```
 
 This example uses an OCI VCN with CIDR `10.0.0.0/16`, so the Cilium native-routing settings below use that VCN range for `ipv4NativeRoutingCIDR` and `ipMasqAgent.nonMasqueradeCIDRs`.
