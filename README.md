@@ -113,6 +113,11 @@ Check that the cluster was successfully created:
 
 ```bash
 kubectl get clusters -A
+```
+
+Example:
+
+```text
 NAMESPACE   NAME   CLUSTERCLASS   AVAILABLE   CP DESIRED   CP AVAILABLE   CP UP-TO-DATE   W DESIRED   W AVAILABLE   W UP-TO-DATE   PHASE         AGE     VERSION
 default     test                  False       1            0              1               0           0             0              Provisioned   4m44s
 ```
@@ -121,6 +126,11 @@ Check that the machine pool was successfully created:
 
 ```bash
 kubectl get machinepools -A
+```
+
+Example:
+
+```text
 NAMESPACE   NAME         CLUSTER   DESIRED   CURRENT   READY   AVAILABLE   UP-TO-DATE   PHASE       AGE     VERSION
 default     test-mp-0    test      2         2         0       0           2            ScalingUp   10m     v1.34.3
 ```
@@ -208,10 +218,15 @@ Verify:
 
 ```bash
 kubectl -n kube-system get ds,pods | grep -i oci-cloud-controller-manager
+kubectl get nodes -o wide
+```
+
+Example:
+
+```text
 daemonset.apps/oci-cloud-controller-manager   1         1         1       1            1           node-role.kubernetes.io/control-plane=   14m
 pod/oci-cloud-controller-manager-9rsln                  1/1     Running   0          105s
 
-kubectl get nodes -o wide
 NAME                        STATUS     ROLES           AGE   VERSION   INTERNAL-IP   EXTERNAL-IP   OS-IMAGE             KERNEL-VERSION      CONTAINER-RUNTIME
 inst-1vn9n-test-mp-0        NotReady   <none>          28m   v1.34.3   10.0.52.141   <none>        Ubuntu 22.04.5 LTS   6.8.0-1047-oracle   containerd://1.7.29
 inst-momez-test-mp-0        NotReady   <none>          28m   v1.34.3   10.0.61.14    <none>        Ubuntu 22.04.5 LTS   6.8.0-1047-oracle   containerd://1.7.29
