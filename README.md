@@ -109,17 +109,20 @@ Apply it:
 kubectl apply -f rendered.yaml
 ```
 
-Check that the cluster and machine pool were successfully created:
+Check that the cluster was successfully created:
 
 ```bash
 kubectl get clusters -A
-```
-
-Example:
-
-```text
 NAMESPACE   NAME   CLUSTERCLASS   AVAILABLE   CP DESIRED   CP AVAILABLE   CP UP-TO-DATE   W DESIRED   W AVAILABLE   W UP-TO-DATE   PHASE         AGE     VERSION
 default     test                  False       1            0              1               0           0             0              Provisioned   4m44s
+```
+
+Check that the machine pool was successfully created:
+
+```bash
+kubectl get machinepools -A
+NAMESPACE   NAME         CLUSTER   DESIRED   CURRENT   READY   AVAILABLE   UP-TO-DATE   PHASE       AGE     VERSION
+default     test-mp-0    test      2         2         0       0           2            ScalingUp   10m     v1.34.3
 ```
 
 To download the kubeconfig for the created cluster, run `clusterctl get kubeconfig <cluster-name> -n <namespace>` and redirect it to a file. For example:
