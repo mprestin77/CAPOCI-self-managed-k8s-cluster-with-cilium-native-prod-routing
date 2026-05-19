@@ -135,7 +135,7 @@ Check that the cluster nodes are being provisioned:
 kubectl get nodes -o wide
 ```
 
-Provisioning the control plane and worker nodes on OCI can take some time, so if the nodes do not appear immediately, wait and run the command again. At this stage the node state is expected to be `NotReady`.
+Provisioning the control plane and worker nodes on OCI can take some time, so if the nodes do not appear immediately, wait and run the command again. After the nodes are provisioned on OCI and join the cluster, the node state is expected to be `NotReady`.
 
 ## Install OCI CCM first
 
