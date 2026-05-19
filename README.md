@@ -141,9 +141,9 @@ Example:
 
 ```text
 NAME                        STATUS     ROLES           AGE     VERSION
-inst-1vn9n-test2-mp-0       NotReady   <none>          3m8s    v1.34.3
-inst-momez-test2-mp-0       NotReady   <none>          3m1s    v1.34.3
-test2-control-plane-lg2rd   NotReady   control-plane   6m37s   v1.34.3
+inst-1vn9n-test-mp-0        NotReady   <none>          3m8s    v1.34.3
+inst-momez-test-mp-0        NotReady   <none>          3m1s    v1.34.3
+test-control-plane-lg2rd    NotReady   control-plane   6m37s   v1.34.3
 ```
 
 ## Install OCI CCM first
