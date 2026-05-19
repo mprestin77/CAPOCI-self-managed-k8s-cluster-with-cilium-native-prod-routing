@@ -183,6 +183,15 @@ env:
     value: "true"
 ```
 
+Before applying `oci-cloud-controller-manager.yaml`, add a toleration so the controller can be scheduled while nodes are still `NotReady`:
+
+```yaml
+tolerations:
+  - key: node.kubernetes.io/not-ready
+    operator: Exists
+    effect: NoSchedule
+```
+
 Then apply the manifests:
 
 ```bash
