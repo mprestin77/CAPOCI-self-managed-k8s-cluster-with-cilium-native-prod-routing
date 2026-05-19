@@ -1,4 +1,4 @@
-# Self-Managed Kubernetes on OCI with CAPOCI and Cilium Native Pod Routing
+# Creating a Self-Managed Kubernetes Cluster on OCI Using CAPOCI and Cilium Native Pod Routing
 
 This repository contains a minimal CAPOCI-based flow for creating a self-managed Kubernetes cluster on Oracle Cloud Infrastructure (OCI) and running Cilium with native pod routing.
 
