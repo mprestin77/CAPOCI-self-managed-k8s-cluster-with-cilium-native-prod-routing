@@ -60,7 +60,7 @@ Important rules:
 - worker FlexCIDR blocks must not overlap with other address ranges already in use
 - pod CIDRs used for native routing must be valid OCI-routable subnet space
 
-In this example, the cluster uses a `MachinePool` together with `OCIMachinePool` in the CAPOCI template. Creating those Kubernetes objects causes CAPOCI to create the corresponding OCI **instance configuration** and **instance pool** for the worker nodes. The pod IP range available to each worker node is controlled through the `flexcidr-primary-vnic` metadata that is injected into the OCI instance configuration. In particular, `cidr-blocks` defines the worker pod CIDR pool and `ip-count` defines how many pod IPs a node can allocate. For example, if `cidr-blocks` is set to `10.0.104.0/22` and `ip-count` is `32`, the FlexCIDR logic allocates `/27`-sized worker node pod ranges, allowing each worker node to allocate 32 pod IPs. On provisioned worker nodes, this appears in OCI instance metadata in a form similar to `"metadata": { "flexcidr-primary-vnic": "{\"cidr-blocks\":[\"10.0.104.0/22\"],\"ip-count\":32}" }`. The OCI FlexCIDR provider reads this worker metadata from IMDS and assigns the corresponding `podCIDR` to the Kubernetes Node object.
+In this example, the cluster uses a `MachinePool` together with `OCIMachinePool` in the CAPOCI template. Creating those Kubernetes objects causes CAPOCI to create the corresponding OCI **instance configuration** and **instance pool** for the worker nodes. The pod IP range available to each worker node is controlled through the `flexcidr-primary-vnic` metadata that is injected into the OCI instance configuration. In particular, `cidr-blocks` defines the worker pod CIDR pool and `ip-count` defines how many pod IPs a node can allocate. For example, if `cidr-blocks` is set to `10.0.100.0/22` and `ip-count` is `32`, the FlexCIDR logic allocates `/27`-sized worker node pod ranges, allowing each worker node to allocate 32 pod IPs. On provisioned worker nodes, this appears in OCI instance metadata in a form similar to `"metadata": { "flexcidr-primary-vnic": "{\"cidr-blocks\":[\"10.0.100.0/22\"],\"ip-count\":32}" }`. The OCI FlexCIDR provider reads this worker metadata from IMDS and assigns the corresponding `podCIDR` to the Kubernetes Node object.
 
 ## Template variables
 
@@ -97,8 +97,8 @@ OCI_NODE_MACHINE_TYPE_MEMORY_IN_GBS=32 \
 OCI_MACHINE_POOL_CIDR_BLOCKS=10.0.100.0/22 \
 OCI_MACHINE_POOL_IP_COUNT=32 \
 VCN_ID=<vcn-ocid> \
-SUBNET_CONTROL_PLANE_ENDPOINT_ID=<CP-endpoint-subnet-ocid> \
-SUBNET_CONTROL_PLANE_ID=<cp-subnet-ocid> \
+SUBNET_CONTROL_PLANE_ENDPOINT_ID=<control-plane-endpoint-subnet-ocid> \
+SUBNET_CONTROL_PLANE_ID=<control-plane-subnet-ocid> \
 SUBNET_WORKER_ID=<worker-subnet-ocid> \
 clusterctl generate cluster test --from cluster-template.yaml > rendered.yaml
 ```
@@ -212,7 +212,7 @@ kubectl -n kube-system logs ds/oci-cloud-controller-manager
 For every worker node, the OCI CCM log should show that the node was successfully patched with a `podCIDR` from the associated FlexCIDR pool, for example:
 
 ```text
-2026-05-12T22:33:04.012Z  INFO  flexcidr/flexcidr.go:227  PrimaryVnicConfig CIDR blocks: [10.0.104.0/22]  {"component": "cloud-controller-manager", "node": "inst-qjfoi-test-mp-0"}
+2026-05-12T22:33:04.012Z  INFO  flexcidr/flexcidr.go:227  PrimaryVnicConfig CIDR blocks: [10.0.100.0/22]  {"component": "cloud-controller-manager", "node": "inst-qjfoi-test-mp-0"}
 2026-05-12T22:33:04.674Z  INFO  flexcidr/flexcidr.go:117  successfully patched node inst-qjfoi-test-mp-0 podCIDRs to [10.0.107.192/27]  {"component": "cloud-controller-manager", "node": "inst-qjfoi-test-mp-0"}
 ```
 
