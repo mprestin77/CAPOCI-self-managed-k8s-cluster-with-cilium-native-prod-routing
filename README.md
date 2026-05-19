@@ -119,7 +119,7 @@ Example:
 
 ```text
 NAMESPACE   NAME   CLUSTERCLASS   AVAILABLE   CP DESIRED   CP AVAILABLE   CP UP-TO-DATE   W DESIRED   W AVAILABLE   W UP-TO-DATE   PHASE         AGE     VERSION
-default     test                  False       1            0              1               0           0             0              Provisioned   3h44m
+default     test                  False       1            0              1               0           0             0              Provisioned   4m44s
 ```
 
 To download the kubeconfig for the created cluster, run `clusterctl get kubeconfig <cluster-name> -n <namespace>` and redirect it to a file. For example:
@@ -132,10 +132,19 @@ export KUBECONFIG=~/.kube/test.kubeconfig
 Check that the cluster nodes are being provisioned:
 
 ```bash
-kubectl get nodes -o wide
+kubectl get nodes
 ```
 
 Provisioning the control plane and worker nodes on OCI can take some time, so if the nodes do not appear immediately, wait and run the command again. After the nodes are provisioned on OCI and join the cluster, the node state is expected to be `NotReady`.
+
+Example:
+
+```text
+NAME                        STATUS     ROLES           AGE     VERSION
+inst-1vn9n-test2-mp-0       NotReady   <none>          3m8s    v1.34.3
+inst-momez-test2-mp-0       NotReady   <none>          3m1s    v1.34.3
+test2-control-plane-lg2rd   NotReady   control-plane   6m37s   v1.34.3
+```
 
 ## Install OCI CCM first
 
