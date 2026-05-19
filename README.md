@@ -205,7 +205,14 @@ Verify:
 
 ```bash
 kubectl -n kube-system get ds,pods | grep -i oci-cloud-controller-manager
-kubectl get nodes
+daemonset.apps/oci-cloud-controller-manager   1         1         1       1            1           node-role.kubernetes.io/control-plane=   14m
+pod/oci-cloud-controller-manager-9rsln                  1/1     Running   0          105s
+
+kubectl get nodes -o wide
+NAME                        STATUS     ROLES           AGE   VERSION   INTERNAL-IP   EXTERNAL-IP   OS-IMAGE             KERNEL-VERSION      CONTAINER-RUNTIME
+inst-1vn9n-test-mp-0        NotReady   <none>          28m   v1.34.3   10.0.52.141   <none>        Ubuntu 22.04.5 LTS   6.8.0-1047-oracle   containerd://1.7.29
+inst-momez-test-mp-0        NotReady   <none>          28m   v1.34.3   10.0.61.14    <none>        Ubuntu 22.04.5 LTS   6.8.0-1047-oracle   containerd://1.7.29
+test-control-plane-lg2rd    NotReady   control-plane   31m   v1.34.3   10.0.42.72    <none>        Ubuntu 22.04.5 LTS   6.8.0-1047-oracle   containerd://1.7.29
 ```
 
 Verify that worker nodes receive `podCIDR`s:
@@ -217,8 +224,8 @@ kubectl get nodes -l cilium-node=true -o jsonpath='{range .items[*]}{.metadata.n
 Workers must get non-overlapping slices from `OCI_MACHINE_POOL_CIDR_BLOCKS`, for example:
 
 ```text
-inst-qjfoi-test-mp-0  podCIDR=10.0.107.192/27
-inst-xnluo-test-mp-0  podCIDR=10.0.106.224/27
+inst-1vn9n-test-mp-0  podCIDR=10.0.103.128/27
+inst-momez-test-mp-0  podCIDR=10.0.102.224/27
 ```
 
 If `podCIDR`s are not assigned to worker nodes, check the OCI CCM logs:
