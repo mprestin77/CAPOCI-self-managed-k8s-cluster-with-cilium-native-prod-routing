@@ -288,13 +288,6 @@ Check CoreDNS:
 kubectl -n kube-system get pods -o wide | grep coredns
 ```
 
-Check DNS:
-
-```bash
-kubectl run -it --rm dns-test --image=registry.k8s.io/e2e-test-images/jessie-dnsutils:1.3 --restart=Never -- nslookup kubernetes.default
-kubectl run -it --rm dns-test2 --image=registry.k8s.io/e2e-test-images/jessie-dnsutils:1.3 --restart=Never -- nslookup google.com
-```
-
 ## Summary
 
 The critical part of this design is separating responsibilities:
