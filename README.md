@@ -36,7 +36,9 @@ You need:
 - an SSH public key
 - CAPOCI management cluster already initialized
 
-This repository assumes you are using [CAPOCI](https://github.com/oracle/cluster-api-provider-oci), Oracle's Cluster API Provider for OCI, to reconcile the Cluster API resources into OCI infrastructure. Before you create the workload cluster from this repo, first prepare a CAPOCI management cluster by following Oracle's [Create Workload Cluster](https://oracle.github.io/cluster-api-provider-oci/gs/create-workload-cluster.html) flow. As prerequisites for that management-cluster setup, configure IAM first: create the required dynamic group and policies for CAPOCI if you are using instance principals, and configure the self-provisioned cluster policies described in [Configure policies for a self-provisioned cluster](https://oracle.github.io/cluster-api-provider-oci/gs/iam/iam-self-provisioned.html#configure-policies-for-a-self-provisioned-cluster). Then provision the management cluster, for example with `kind`, as described in [Provision a management cluster with kind](https://oracle.github.io/cluster-api-provider-oci/gs/mgmt/mgmt-kind.html), and initialize CAPOCI there before rendering and applying the workload-cluster manifest in this repository.
+This repository assumes you are using [CAPOCI](https://github.com/oracle/cluster-api-provider-oci), Oracle's Cluster API Provider for OCI, to reconcile the Cluster API resources in this repository into OCI infrastructure. The manifests here are workload-cluster manifests, so they must be rendered and applied from a separate management cluster where CAPOCI is already installed.
+
+For the management-cluster setup, follow Oracle's documented CAPOCI flow: choose a management cluster, prepare any custom OCI images, configure the required IAM, provision the management cluster, install the required tools, configure IAM for the self-provisioned workload cluster, [Install Cluster API Provider for Oracle Cloud Infrastructure](https://oracle.github.io/cluster-api-provider-oci/gs/install-cluster-api.html#install-cluster-api-provider-for-oracle-cloud-infrastructure), and then [Create Workload Cluster](https://oracle.github.io/cluster-api-provider-oci/gs/create-workload-cluster.html). If your management cluster runs in OCI, I recommend using instance principal for CAPOCI authentication. In that case, create a dynamic group for the management-cluster instances and grant the CAPOCI permissions described in the install guide, instead of using a user-group-based CAPOCI credential setup. The workload cluster still needs the self-provisioned IAM policies described in [Configure policies for a self-provisioned cluster](https://oracle.github.io/cluster-api-provider-oci/gs/iam/iam-self-provisioned.html#configure-policies-for-a-self-provisioned-cluster).
 
 ## Required OCI network infrastructure
 
@@ -106,6 +108,34 @@ Apply it:
 ```bash
 kubectl apply -f rendered.yaml
 ```
+
+Check that the cluster and machine pool were successfully created:
+
+```bash
+kubectl get clusters -A
+```
+
+Example:
+
+```text
+NAMESPACE   NAME   CLUSTERCLASS   AVAILABLE   CP DESIRED   CP AVAILABLE   CP UP-TO-DATE   W DESIRED   W AVAILABLE   W UP-TO-DATE   PHASE         AGE     VERSION
+default     test                  False       1            0              1               0           0             0              Provisioned   3h44m
+```
+
+To download the kubeconfig for the created cluster, run `clusterctl get kubeconfig <cluster-name> -n <namespace>` and redirect it to a file. For example:
+
+```bash
+clusterctl get kubeconfig test -n default > ~/.kube/test.kubeconfig
+export KUBECONFIG=~/.kube/test.kubeconfig
+```
+
+Check that the cluster nodes are being provisioned:
+
+```bash
+kubectl get nodes -o wide
+```
+
+Provisioning the control plane and worker nodes on OCI can take some time, so if the nodes do not appear immediately, wait and run the command again. During this phase the node state is expected to be `NotReady`.
 
 ## Install OCI CCM first
 
