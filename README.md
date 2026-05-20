@@ -320,14 +320,6 @@ helm upgrade --install cilium cilium/cilium --version 1.19.1 \
 
 ## Verify the cluster
 
-Check nodes:
-
-```bash
-kubectl get nodes
-kubectl describe nodes | egrep -i 'Name:|Taints:'
-kubectl get nodes -o jsonpath='{range .items[*]}{.metadata.name}{"  podCIDR="}{.spec.podCIDR}{"\n"}{end}'
-```
-
 Check Cilium:
 
 ```bash
@@ -336,10 +328,35 @@ kubectl -n kube-system exec ds/cilium -- cilium status
 kubectl -n kube-system exec ds/cilium -- cilium-health status
 ```
 
+After Cilium pods are started on the control-plane and worker nodes, all nodes must be in `Ready` state.
+
+Check nodes:
+
+```bash
+kubectl get nodes -o wide
+kubectl get nodes -o jsonpath='{range .items[*]}{.metadata.name}{"  podCIDR="}{.spec.podCIDR}{"\n"}{end}'
+```
+
+Example:
+
+```text
+NAME                       STATUS   ROLES           AGE     VERSION   INTERNAL-IP   EXTERNAL-IP   OS-IMAGE             KERNEL-VERSION      CONTAINER-RUNTIME
+inst-1vn9n-test-mp-0       Ready    <none>          35m     v1.34.3   10.0.52.141   <none>        Ubuntu 22.04.5 LTS   6.8.0-1047-oracle   containerd://1.7.29
+inst-momez-test-mp-0       Ready    <none>          35m     v1.34.3   10.0.61.14    <none>        Ubuntu 22.04.5 LTS   6.8.0-1047-oracle   containerd://1.7.29
+test-control-plane-lg2rd   Ready    control-plane   38m     v1.34.3   10.0.42.72    <none>        Ubuntu 22.04.5 LTS   6.8.0-1047-oracle   containerd://1.7.29
+```
+
 Check CoreDNS:
 
 ```bash
 kubectl -n kube-system get pods -o wide | grep coredns
+```
+
+Example:
+
+```text
+coredns-66bc5c9577-5cfvn   1/1   Running   0   26m   10.0.103.130   inst-1vn9n-test-mp-0   <none>   <none>
+coredns-66bc5c9577-kskqr   1/1   Running   0   26m   10.0.103.131   inst-1vn9n-test-mp-0   <none>   <none>
 ```
 
 ## Summary
