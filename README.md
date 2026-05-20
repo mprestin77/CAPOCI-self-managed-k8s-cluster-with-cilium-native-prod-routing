@@ -60,7 +60,7 @@ Important rules:
 - FlexCIDR blocks must not overlap with other address ranges already in use
 - pod CIDRs used for native routing must be valid OCI-routable subnet space
 
-In this example, the cluster uses a `MachinePool` together with `OCIMachinePool` in the CAPOCI template for the worker nodes. Creating those Kubernetes objects causes CAPOCI to create the corresponding OCI **instance configuration** and **instance pool** for the worker nodes. The pod IP range available to each node is controlled through the `flexcidr-primary-vnic` metadata. For the worker nodes, that metadata is injected into the OCI instance configuration. The control-plane instance needs the same metadata added separately before OCI CCM is installed so that OCI FlexCIDR can assign a `podCIDR` to the control-plane node as well. In particular, `cidr-blocks` defines the node pod CIDR pool and `ip-count` defines how many pod IPs a node can allocate. For example, if `cidr-blocks` is set to `10.0.100.0/22` and `ip-count` is `32`, the FlexCIDR logic allocates `/27`-sized node pod ranges, allowing each node to allocate 32 pod IPs. In OCI instance metadata, this appears in a form similar to `"metadata": { "flexcidr-primary-vnic": "{\"cidr-blocks\":[\"10.0.100.0/22\"],\"ip-count\":32}" }`. The OCI FlexCIDR provider reads this metadata from IMDS and assigns the corresponding `podCIDR` to the Kubernetes Node object.
+In this example, the cluster uses a `MachinePool` together with `OCIMachinePool` for the worker nodes and an `OCIMachineTemplate` for the control plane. The pod IP range available to each node is controlled through the `flexcidr-primary-vnic` metadata. For the worker nodes, that metadata is injected through `OCIMachinePool.spec.instanceConfiguration.metadata`. For the control-plane nodes, the same metadata is injected through `OCIMachineTemplate.spec.template.spec.metadata`, so CAPOCI provisions both roles with the required FlexCIDR configuration from the start. In particular, `cidr-blocks` defines the node pod CIDR pool and `ip-count` defines how many pod IPs a node can allocate. For example, if `cidr-blocks` is set to `10.0.100.0/22` and `ip-count` is `32`, the FlexCIDR logic allocates `/27`-sized node pod ranges, allowing each node to allocate 32 pod IPs. In OCI instance metadata, this appears in a form similar to `"metadata": { "flexcidr-primary-vnic": "{\"cidr-blocks\":[\"10.0.100.0/22\"],\"ip-count\":32}" }`. The OCI FlexCIDR provider reads this metadata from IMDS and assigns the corresponding `podCIDR` to the Kubernetes Node object.
 
 ## Template variables
 
@@ -164,29 +164,7 @@ The nodes are configured with `cloud-provider: external`, so OCI CCM must be ins
 
 Note: OCI FlexCIDR provider was included in OCI CCM `v1.33.1-rc3`. It is expected to be merged into a regular OCI CCM release in the future, but at the time of writing you need to use the release-candidate image from `ghcr.io/akarshes/cloud-provider-oci-amd64:v1.33.1-rc3`.
 
-Before installing OCI CCM, add the same FlexCIDR metadata to each control-plane instance. This example reuses the same `OCI_MACHINE_POOL_CIDR_BLOCKS` and `OCI_MACHINE_POOL_IP_COUNT` values that are already used for the worker pool.
-
-Get the control-plane instance OCID and download its current metadata:
-
-```bash
-CONTROL_PLANE_INSTANCE_ID=$(kubectl get nodes -l node-role.kubernetes.io/control-plane= -o jsonpath='{.items[0].spec.providerID}' | sed 's#oci://##')
-oci compute instance get --instance-id "$CONTROL_PLANE_INSTANCE_ID" --query 'data.metadata' > control-plane-metadata.json
-```
-
-Add a `flexcidr-primary-vnic` entry to `control-plane-metadata.json`, for example:
-
-```json
-"flexcidr-primary-vnic": "{\"cidr-blocks\":[\"10.0.100.0/22\"],\"ip-count\":32}"
-```
-
-Then update the instance metadata and verify the new key:
-
-```bash
-oci compute instance update --instance-id "$CONTROL_PLANE_INSTANCE_ID" --metadata file://control-plane-metadata.json
-oci compute instance get --instance-id "$CONTROL_PLANE_INSTANCE_ID" --query 'data.metadata."flexcidr-primary-vnic"' --raw-output
-```
-
-Repeat this step for each control-plane instance. The update replaces the instance `metadata` map, so preserve the existing keys in `control-plane-metadata.json` and add the new `flexcidr-primary-vnic` entry instead of sending only the new key.
+The `cluster-template.yaml` in this repo already sets `flexcidr-primary-vnic` for both worker and control-plane nodes, so no separate instance-metadata update is needed before installing OCI CCM. Make sure `OCI_MACHINE_POOL_CIDR_BLOCKS` and `OCI_MACHINE_POOL_IP_COUNT` are set correctly before you generate and apply `rendered.yaml`.
 
 Download the upstream OCI CCM provider-config template and save it locally as `cloud-provider.yaml`:
 
