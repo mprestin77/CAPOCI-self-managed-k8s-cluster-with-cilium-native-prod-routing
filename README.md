@@ -67,15 +67,25 @@ In this example, the cluster uses a `MachinePool` together with `OCIMachinePool`
 
 ## Template variables
 
-Main variables used by `cluster-template.yaml`:
+Variables used by `cluster-template.yaml`:
 
 - `CLUSTER_NAME`
 - `NAMESPACE`
 - `COMPARTMENT_ID`
+- `OCI_SSH_KEY`
 - `OCI_IMAGE_ID`
 - `KUBERNETES_VERSION`
+- `SERVICE_DOMAIN`
+- `CONTROL_PLANE_MACHINE_COUNT`
+- `OCI_CONTROL_PLANE_MACHINE_TYPE`
+- `OCI_CONTROL_PLANE_MACHINE_TYPE_OCPUS`
 - `OCI_CONTROL_PLANE_CIDR_BLOCKS`
 - `OCI_CONTROL_PLANE_IP_COUNT`
+- `OCI_CONTROL_PLANE_PV_TRANSIT_ENCRYPTION`
+- `WORKER_MACHINE_COUNT`
+- `OCI_NODE_MACHINE_TYPE`
+- `OCI_NODE_MACHINE_TYPE_OCPUS`
+- `OCI_NODE_MACHINE_TYPE_MEMORY_IN_GBS`
 - `VCN_ID`
 - `SUBNET_CONTROL_PLANE_ENDPOINT_ID`
 - `SUBNET_CONTROL_PLANE_ID`
@@ -88,25 +98,31 @@ Main variables used by `cluster-template.yaml`:
 Example:
 
 ```bash
-COMPARTMENT_ID="<cluster-compartment-ocid>" \
-OCI_SSH_KEY=$(cat <path to SSH public key>) \
-KUBERNETES_VERSION=v1.34.3 \
-OCI_IMAGE_ID="<image-ocid>" \
-NAMESPACE=default \
-CONTROL_PLANE_MACHINE_COUNT=1 \
-OCI_CONTROL_PLANE_CIDR_BLOCKS="10.0.100.0/22" \
-OCI_CONTROL_PLANE_IP_COUNT=16 \
-WORKER_MACHINE_COUNT=2 \
-OCI_NODE_MACHINE_TYPE="VM.Standard.E5.Flex" \
-OCI_NODE_MACHINE_TYPE_OCPUS=2 \
-OCI_NODE_MACHINE_TYPE_MEMORY_IN_GBS=32 \
-OCI_MACHINE_POOL_CIDR_BLOCKS="10.0.100.0/22" \
-OCI_MACHINE_POOL_IP_COUNT=32 \
-VCN_ID="<vcn-ocid>" \
-SUBNET_CONTROL_PLANE_ENDPOINT_ID="<control-plane-endpoint-subnet-ocid>" \
-SUBNET_CONTROL_PLANE_ID="<control-plane-subnet-ocid>" \
-SUBNET_WORKER_ID="<worker-subnet-ocid>" \
-clusterctl generate cluster test \
+export CLUSTER_NAME=test
+export NAMESPACE=default
+export COMPARTMENT_ID="<cluster-compartment-ocid>"
+export OCI_SSH_KEY=$(cat <path to SSH public key>)
+export OCI_IMAGE_ID="<image-ocid>"
+export KUBERNETES_VERSION=v1.34.3
+export SERVICE_DOMAIN=cluster.local
+export CONTROL_PLANE_MACHINE_COUNT=1
+export OCI_CONTROL_PLANE_MACHINE_TYPE="VM.Standard.E5.Flex"
+export OCI_CONTROL_PLANE_MACHINE_TYPE_OCPUS=1
+export OCI_CONTROL_PLANE_CIDR_BLOCKS="10.0.100.0/22"
+export OCI_CONTROL_PLANE_IP_COUNT=16
+export OCI_CONTROL_PLANE_PV_TRANSIT_ENCRYPTION=true
+export WORKER_MACHINE_COUNT=2
+export OCI_NODE_MACHINE_TYPE="VM.Standard.E5.Flex"
+export OCI_NODE_MACHINE_TYPE_OCPUS=2
+export OCI_NODE_MACHINE_TYPE_MEMORY_IN_GBS=32
+export VCN_ID="<vcn-ocid>"
+export SUBNET_CONTROL_PLANE_ENDPOINT_ID="<control-plane-endpoint-subnet-ocid>"
+export SUBNET_CONTROL_PLANE_ID="<control-plane-subnet-ocid>"
+export SUBNET_WORKER_ID="<worker-subnet-ocid>"
+export OCI_MACHINE_POOL_CIDR_BLOCKS="10.0.100.0/22"
+export OCI_MACHINE_POOL_IP_COUNT=32
+
+clusterctl generate cluster "${CLUSTER_NAME}" \
 --from cluster-template.yaml > rendered.yaml
 ```
 
@@ -267,10 +283,10 @@ inst-momez-test-mp-0       podCIDR=10.0.102.224/27
 If `podCIDR`s are not assigned to the nodes, check the OCI CCM logs:
 
 ```bash
-kubectl -n kube-system logs ds/oci-cloud-controller-manager | grep "successfully patched node"
+kubectl -n kube-system logs ds/oci-cloud-controller-manager
 ```
 
-For each node, the OCI CCM log should show that the node was successfully patched with a `podCIDR` from the associated FlexCIDR pool, for example:
+For each node, look for log lines showing that the node was successfully patched with a `podCIDR` from the associated FlexCIDR pool, for example:
 
 ```text
 2026-05-20T17:24:50.300Z  INFO	flexcidr/flexcidr.go:117  successfully patched node inst-1vn9n-test-mp-0 podCIDRs to [10.0.103.128/27]	{"component": "cloud-controller-manager", "node": "inst-1vn9n-test-mp-0"}
