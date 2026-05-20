@@ -266,14 +266,15 @@ inst-momez-test-mp-0       podCIDR=10.0.102.224/27
 If `podCIDR`s are not assigned to the nodes, check the OCI CCM logs:
 
 ```bash
-kubectl -n kube-system logs ds/oci-cloud-controller-manager
+kubectl -n kube-system logs ds/oci-cloud-controller-manager | grep "successfully patched node"
 ```
 
 For each node, the OCI CCM log should show that the node was successfully patched with a `podCIDR` from the associated FlexCIDR pool, for example:
 
 ```text
-2026-05-19T20:32:14.209Z  INFO  flexcidr/flexcidr.go:227  PrimaryVnicConfig CIDR blocks: [10.0.100.0/22]  {"component": "cloud-controller-manager", "node": "inst-1vn9n-test-mp-0"}
-2026-05-19T20:32:14.791Z  INFO  flexcidr/flexcidr.go:117  successfully patched node inst-1vn9n-test-mp-0 podCIDRs to [10.0.103.128/27]   {"component": "cloud-controller-manager", "node": "inst-1vn9n-test-mp-0"}
+2026-05-20T17:24:50.300Z  INFO	flexcidr/flexcidr.go:117  successfully patched node inst-1vn9n-test-mp-0 podCIDRs to [10.0.103.128/27]	{"component": "cloud-controller-manager", "node": "inst-1vn9n-test-mp-0"}
+2026-05-20T17:24:51.466Z  INFO	flexcidr/flexcidr.go:117  successfully patched node inst-momez-test-mp-0 podCIDRs to [10.0.102.224/27]	{"component": "cloud-controller-manager", "node": "inst-momez-test-mp-0"}
+2026-05-20T17:24:52.440   INFO	flexcidr/flexcidr.go:117  successfully patched node test-control-plane-lg2rd podCIDRs to [10.0.101.96/28]  {"component": "cloud-controller-manager", "node": "test-control-plane-lg2rd"}
 ```
 
 ## Install Cilium third
