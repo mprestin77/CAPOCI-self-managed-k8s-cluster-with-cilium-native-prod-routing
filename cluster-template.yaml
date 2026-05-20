@@ -114,8 +114,6 @@ spec:
           value: external
         - name: provider-id
           value: oci://{{ ds["id"] }}
-        - name: node-labels
-          value: cilium-node=true
 
 ---
 apiVersion: cluster.x-k8s.io/v1beta2
