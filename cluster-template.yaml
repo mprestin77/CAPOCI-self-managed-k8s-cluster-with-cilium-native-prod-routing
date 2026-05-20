@@ -98,7 +98,7 @@ spec:
           ocpus: "${OCI_CONTROL_PLANE_MACHINE_TYPE_OCPUS:=1}"
         metadata:
           ssh_authorized_keys: "${OCI_SSH_KEY}"
-          flexcidr-primary-vnic: '{"cidr-blocks":["${OCI_MACHINE_POOL_CIDR_BLOCKS}"],"ip-count":${OCI_MACHINE_POOL_IP_COUNT}}'
+          flexcidr-primary-vnic: '{"cidr-blocks":["${OCI_CONTROL_PLANE_CIDR_BLOCKS}"],"ip-count":${OCI_CONTROL_PLANE_IP_COUNT}}'
         isPvEncryptionInTransitEnabled: ${OCI_CONTROL_PLANE_PV_TRANSIT_ENCRYPTION:=true}
 ---
 apiVersion: bootstrap.cluster.x-k8s.io/v1beta2

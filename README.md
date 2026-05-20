@@ -48,11 +48,14 @@ When you use Cilium in native routing mode together with OCI FlexCIDR, the OCI n
 
 ## CIDR design
 
-Use **non-overlapping** CIDR ranges.
+Use **non-overlapping** CIDR ranges when control-plane and worker nodes use different FlexCIDR pools. If both roles use the same FlexCIDR pool, the assigned node `podCIDR`s must still be non-overlapping.
 
 Example:
 
+- `OCI_CONTROL_PLANE_CIDR_BLOCKS=10.0.100.0/22`
+- `OCI_CONTROL_PLANE_IP_COUNT=16`
 - `OCI_MACHINE_POOL_CIDR_BLOCKS=10.0.100.0/22`
+- `OCI_MACHINE_POOL_IP_COUNT=32`
 
 Important rules:
 
@@ -60,7 +63,7 @@ Important rules:
 - FlexCIDR blocks must not overlap with other address ranges already in use
 - pod CIDRs used for native routing must be valid OCI-routable subnet space
 
-In this example, the cluster uses a `MachinePool` together with `OCIMachinePool` for the worker nodes and an `OCIMachineTemplate` for the control plane. The pod IP range available to each node is controlled through the `flexcidr-primary-vnic` metadata. For the worker nodes, that metadata is injected through `OCIMachinePool.spec.instanceConfiguration.metadata`. For the control-plane nodes, the same metadata is injected through `OCIMachineTemplate.spec.template.spec.metadata`, so CAPOCI provisions both roles with the required FlexCIDR configuration from the start. In particular, `cidr-blocks` defines the node pod CIDR pool and `ip-count` defines how many pod IPs a node can allocate. For example, if `cidr-blocks` is set to `10.0.100.0/22` and `ip-count` is `32`, the FlexCIDR logic allocates `/27`-sized node pod ranges, allowing each node to allocate 32 pod IPs. In OCI instance metadata, this appears in a form similar to `"metadata": { "flexcidr-primary-vnic": "{\"cidr-blocks\":[\"10.0.100.0/22\"],\"ip-count\":32}" }`. The OCI FlexCIDR provider reads this metadata from IMDS and assigns the corresponding `podCIDR` to the Kubernetes Node object.
+In this example, the cluster uses a `MachinePool` together with `OCIMachinePool` for the worker nodes and an `OCIMachineTemplate` for the control plane. The pod IP range available to each node is controlled through the `flexcidr-primary-vnic` metadata. For the worker nodes, that metadata is injected through `OCIMachinePool.spec.instanceConfiguration.metadata`. For the control-plane nodes, the same metadata is injected through `OCIMachineTemplate.spec.template.spec.metadata`, so CAPOCI provisions both roles with the required FlexCIDR configuration from the start. The control plane and worker nodes can use different FlexCIDR settings. In particular, `cidr-blocks` defines the node pod CIDR pool and `ip-count` defines how many pod IPs a node can allocate. For example, if control-plane nodes use `cidr-blocks=10.0.100.0/22` with `ip-count=16`, FlexCIDR allocates `/28`-sized pod ranges for control-plane nodes. If worker nodes use `cidr-blocks=10.0.100.0/22` with `ip-count=32`, FlexCIDR allocates `/27`-sized pod ranges for worker nodes. In OCI instance metadata, this appears in a form similar to `"metadata": { "flexcidr-primary-vnic": "{\"cidr-blocks\":[\"10.0.100.0/22\"],\"ip-count\":16}" }` for a control-plane node. The OCI FlexCIDR provider reads this metadata from IMDS and assigns the corresponding `podCIDR` to the Kubernetes Node object.
 
 ## Template variables
 
@@ -71,6 +74,8 @@ Main variables used by `cluster-template.yaml`:
 - `COMPARTMENT_ID`
 - `OCI_IMAGE_ID`
 - `KUBERNETES_VERSION`
+- `OCI_CONTROL_PLANE_CIDR_BLOCKS`
+- `OCI_CONTROL_PLANE_IP_COUNT`
 - `VCN_ID`
 - `SUBNET_CONTROL_PLANE_ENDPOINT_ID`
 - `SUBNET_CONTROL_PLANE_ID`
@@ -88,6 +93,8 @@ OCI_SSH_KEY="$(cat <path to SSH public key>)" \
 KUBERNETES_VERSION=v1.34.3 \
 OCI_IMAGE_ID=<image-ocid> \
 CONTROL_PLANE_MACHINE_COUNT=1 \
+OCI_CONTROL_PLANE_CIDR_BLOCKS=10.0.100.0/22 \
+OCI_CONTROL_PLANE_IP_COUNT=16 \
 NAMESPACE=default \
 WORKER_MACHINE_COUNT=2 \
 OCI_NODE_MACHINE_TYPE=VM.Standard.E5.Flex \
@@ -164,7 +171,7 @@ The nodes are configured with `cloud-provider: external`, so OCI CCM must be ins
 
 Note: OCI FlexCIDR provider was included in OCI CCM `v1.33.1-rc3`. It is expected to be merged into a regular OCI CCM release in the future, but at the time of writing you need to use the release-candidate image from `ghcr.io/akarshes/cloud-provider-oci-amd64:v1.33.1-rc3`.
 
-The `cluster-template.yaml` in this repo already sets `flexcidr-primary-vnic` for both worker and control-plane nodes, so no separate instance-metadata update is needed before installing OCI CCM. Make sure `OCI_MACHINE_POOL_CIDR_BLOCKS` and `OCI_MACHINE_POOL_IP_COUNT` are set correctly before you generate and apply `rendered.yaml`.
+The `cluster-template.yaml` in this repo already sets `flexcidr-primary-vnic` for both worker and control-plane nodes, so no separate instance-metadata update is needed before installing OCI CCM. Make sure `OCI_CONTROL_PLANE_CIDR_BLOCKS`, `OCI_CONTROL_PLANE_IP_COUNT`, `OCI_MACHINE_POOL_CIDR_BLOCKS`, and `OCI_MACHINE_POOL_IP_COUNT` are set correctly before you generate and apply `rendered.yaml`.
 
 Download the upstream OCI CCM provider-config template and save it locally as `cloud-provider.yaml`:
 
@@ -248,12 +255,12 @@ Verify that all nodes receive `podCIDR`s:
 kubectl get nodes -o jsonpath='{range .items[*]}{.metadata.name}{"  podCIDR="}{.spec.podCIDR}{"\n"}{end}'
 ```
 
-All nodes must get non-overlapping slices from `OCI_MACHINE_POOL_CIDR_BLOCKS`, for example:
+All nodes must get non-overlapping slices from the configured FlexCIDR blocks, for example:
 
 ```text
-test-control-plane-lg2rd   podCIDR=10.0.101.96/27
-inst-1vn9n-test-mp-0  podCIDR=10.0.103.128/27
-inst-momez-test-mp-0  podCIDR=10.0.102.224/27
+test-control-plane-lg2rd   podCIDR=10.0.101.96/28
+inst-1vn9n-test-mp-0       podCIDR=10.0.103.128/27
+inst-momez-test-mp-0       podCIDR=10.0.102.224/27
 ```
 
 If `podCIDR`s are not assigned to the nodes, check the OCI CCM logs:
