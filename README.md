@@ -166,7 +166,7 @@ inst-momez-test-mp-0        NotReady   <none>          3m1s    v1.34.3
 test-control-plane-lg2rd    NotReady   control-plane   6m37s   v1.34.3
 ```
 
-## Install OCI CCM first
+## Install OCI CCM
 
 The nodes are configured with `cloud-provider: external`, so OCI CCM must be installed before the cluster becomes fully initialized.
 
@@ -280,7 +280,7 @@ For each node, the OCI CCM log should show that the node was successfully patche
 
 If a node was not patched successfully, inspect the associated errors in the OCI CCM log for that node.
 
-## Install Cilium third
+## Install Cilium
 
 Install Cilium only after node `podCIDR`s are assigned.
 
