@@ -277,6 +277,8 @@ For each node, the OCI CCM log should show that the node was successfully patche
 2026-05-20T17:24:52.440   INFO	flexcidr/flexcidr.go:117  successfully patched node test-control-plane-lg2rd podCIDRs to [10.0.101.96/28]  {"component": "cloud-controller-manager", "node": "test-control-plane-lg2rd"}
 ```
 
+If a node was not patched successfully, inspect the associated errors in the OCI CCM log for that node.
+
 ## Install Cilium third
 
 Install Cilium only after node `podCIDR`s are assigned.
