@@ -88,25 +88,24 @@ Main variables used by `cluster-template.yaml`:
 Example:
 
 ```bash
-export COMPARTMENT_ID="<cluster-compartment-ocid>"
-export OCI_SSH_KEY=$(cat <path to SSH public key>)
-export KUBERNETES_VERSION=v1.34.3
-export OCI_IMAGE_ID="<image-ocid>"
-export CONTROL_PLANE_MACHINE_COUNT=1
-export OCI_CONTROL_PLANE_CIDR_BLOCKS="10.0.100.0/22"
-export OCI_CONTROL_PLANE_IP_COUNT=16
-export NAMESPACE=default
-export WORKER_MACHINE_COUNT=2
-export OCI_NODE_MACHINE_TYPE="VM.Standard.E5.Flex"
-export OCI_NODE_MACHINE_TYPE_OCPUS=2
-export OCI_NODE_MACHINE_TYPE_MEMORY_IN_GBS=32
-export OCI_MACHINE_POOL_CIDR_BLOCKS="10.0.100.0/22"
-export OCI_MACHINE_POOL_IP_COUNT=32
-export VCN_ID="<vcn-ocid>"
-export SUBNET_CONTROL_PLANE_ENDPOINT_ID="<control-plane-endpoint-subnet-ocid>"
-export SUBNET_CONTROL_PLANE_ID="<control-plane-subnet-ocid>"
-export SUBNET_WORKER_ID="<worker-subnet-ocid>"
-
+COMPARTMENT_ID="<cluster-compartment-ocid>" \
+OCI_SSH_KEY=$(cat <path to SSH public key>) \
+KUBERNETES_VERSION=v1.34.3 \
+OCI_IMAGE_ID="<image-ocid>" \
+NAMESPACE=default \
+CONTROL_PLANE_MACHINE_COUNT=1 \
+OCI_CONTROL_PLANE_CIDR_BLOCKS="10.0.100.0/22" \
+OCI_CONTROL_PLANE_IP_COUNT=16 \
+WORKER_MACHINE_COUNT=2 \
+OCI_NODE_MACHINE_TYPE="VM.Standard.E5.Flex" \
+OCI_NODE_MACHINE_TYPE_OCPUS=2 \
+OCI_NODE_MACHINE_TYPE_MEMORY_IN_GBS=32 \
+OCI_MACHINE_POOL_CIDR_BLOCKS="10.0.100.0/22" \
+OCI_MACHINE_POOL_IP_COUNT=32 \
+VCN_ID="<vcn-ocid>" \
+SUBNET_CONTROL_PLANE_ENDPOINT_ID="<control-plane-endpoint-subnet-ocid>" \
+SUBNET_CONTROL_PLANE_ID="<control-plane-subnet-ocid>" \
+SUBNET_WORKER_ID="<worker-subnet-ocid>" \
 clusterctl generate cluster test \
 --from cluster-template.yaml > rendered.yaml
 ```
