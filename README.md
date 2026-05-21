@@ -45,7 +45,7 @@ For the management-cluster setup:
 3. [Provision a management cluster](https://oracle.github.io/cluster-api-provider-oci/gs/mgmt/mgmt-kind.html). You can use a Kind cluster, OKE, or another compliant Kubernetes cluster as the management cluster. Its role is to host the Cluster API CRDs, the CAPOCI controllers, and the kubeconfig context from which you create and manage workload clusters.
 4. [Install CAPOCI and initialize the management cluster](https://oracle.github.io/cluster-api-provider-oci/gs/install-cluster-api.html). This step installs the Cluster API and CAPOCI components into the management cluster so it can understand CAPOCI resource types and reconcile workload-cluster manifests into OCI infrastructure. If the management cluster runs in OCI, I recommend using instance principal authentication for CAPOCI.
 
-The workload cluster still needs the self-provisioned IAM policies described in [Configure policies for a self-provisioned cluster](https://oracle.github.io/cluster-api-provider-oci/gs/iam/iam-self-provisioned.html#configure-policies-for-a-self-provisioned-cluster).
+The workload cluster still needs the self-provisioned IAM policies described in [Configure policies for a self-provisioned cluster](https://oracle.github.io/cluster-api-provider-oci/gs/iam/iam-self-provisioned.html#configure-policies-for-a-self-provisioned-cluster). If you use instance principal for workload-cluster components, grant the equivalent policies to the appropriate dynamic group.
 
 ## Required OCI network infrastructure
 
