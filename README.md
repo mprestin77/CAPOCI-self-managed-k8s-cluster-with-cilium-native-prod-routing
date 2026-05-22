@@ -391,4 +391,3 @@ The critical part of this design is separating responsibilities:
 - **OCI CCM** initializes nodes
 - **OCI FlexCIDR provider** assigns node `podCIDR`s
 - **Cilium** consumes those node `podCIDR`s in native routing mode
-- **CoreDNS and workloads** run on worker nodes
