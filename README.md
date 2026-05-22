@@ -16,7 +16,6 @@ The flow in this repo uses:
 - **CAPOCI** to create the workload cluster
 - **OCI CCM** with **FlexCIDR provider** to initialize nodes and assign node `podCIDR`s
 - **Cilium** with `routingMode=native` and `ipam.mode=kubernetes`
-- **CoreDNS** running on worker nodes
 
 The intended ownership model is:
 
