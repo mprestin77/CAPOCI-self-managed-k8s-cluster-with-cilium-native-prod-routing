@@ -268,10 +268,10 @@ Example:
 daemonset.apps/oci-cloud-controller-manager   1         1         1       1            1           node-role.kubernetes.io/control-plane=   14m
 pod/oci-cloud-controller-manager-9rsln                  1/1     Running   0          105s
 
-NAME                        STATUS     ROLES           AGE   VERSION   INTERNAL-IP   EXTERNAL-IP   OS-IMAGE             KERNEL-VERSION      CONTAINER-RUNTIME
-inst-1vn9n-test-mp-0        NotReady   <none>          28m   v1.34.3   10.0.52.141   <none>        Ubuntu 22.04.5 LTS   6.8.0-1047-oracle   containerd://1.7.29
-inst-momez-test-mp-0        NotReady   <none>          28m   v1.34.3   10.0.61.14    <none>        Ubuntu 22.04.5 LTS   6.8.0-1047-oracle   containerd://1.7.29
-test-control-plane-lg2rd    NotReady   control-plane   31m   v1.34.3   10.0.42.72    <none>        Ubuntu 22.04.5 LTS   6.8.0-1047-oracle   containerd://1.7.29
+NAME                       STATUS     ROLES           AGE     VERSION   INTERNAL-IP   EXTERNAL-IP   OS-IMAGE             KERNEL-VERSION      CONTAINER-RUNTIME
+inst-gdtie-test-mp-0       NotReady   <none>          4h14m   v1.35.2   10.0.49.204   <none>        Ubuntu 22.04.5 LTS   6.8.0-1060-oracle   containerd://1.7.29
+inst-j1f4r-test-mp-0       NotReady   <none>          4h14m   v1.35.2   10.0.44.45    <none>        Ubuntu 22.04.5 LTS   6.8.0-1060-oracle   containerd://1.7.29
+test-control-plane-hgrpx   NotReady   control-plane   52m     v1.35.2   10.0.34.146   <none>        Ubuntu 22.04.5 LTS   6.8.0-1060-oracle   containerd://1.7.29
 ```
 
 Verify that all nodes receive `podCIDR`s:
@@ -283,9 +283,9 @@ kubectl get nodes -o jsonpath='{range .items[*]}{.metadata.name}{"  podCIDR="}{.
 All nodes must get non-overlapping slices from the configured FlexCIDR blocks, for example:
 
 ```text
-test-control-plane-lg2rd   podCIDR=10.0.101.96/28
-inst-1vn9n-test-mp-0       podCIDR=10.0.103.128/27
-inst-momez-test-mp-0       podCIDR=10.0.102.224/27
+inst-gdtie-test-mp-0  podCIDR=10.0.100.192/27
+inst-j1f4r-test-mp-0  podCIDR=10.0.101.64/27
+test-control-plane-hgrpx  podCIDR=10.0.101.208/28
 ```
 
 If `podCIDR`s are not assigned to the nodes, check the OCI CCM logs:
