@@ -111,7 +111,7 @@ export NAMESPACE=default
 export COMPARTMENT_ID="<cluster-compartment-ocid>"
 export OCI_SSH_KEY=$(cat <path to SSH public key>)
 export OCI_IMAGE_ID="<image-ocid>"
-export KUBERNETES_VERSION=v1.34.3
+export KUBERNETES_VERSION=v1.35.2
 export SERVICE_DOMAIN=cluster.local
 export CONTROL_PLANE_MACHINE_COUNT=1
 export OCI_CONTROL_PLANE_MACHINE_TYPE="VM.Standard.E5.Flex"
@@ -163,7 +163,7 @@ Example:
 
 ```text
 NAMESPACE   NAME         CLUSTER   DESIRED   CURRENT   READY   AVAILABLE   UP-TO-DATE   PHASE       AGE     VERSION
-default     test-mp-0    test      2         2         0       0           2            ScalingUp   10m     v1.34.3
+default     test-mp-0    test      2         2         0       0           2            ScalingUp   10m     v1.35.2
 ```
 
 To download the kubeconfig for the created cluster, run `clusterctl get kubeconfig <cluster-name> -n <namespace>` and redirect it to a file. For example:
@@ -185,9 +185,9 @@ Example:
 
 ```text
 NAME                        STATUS     ROLES           AGE     VERSION
-inst-1vn9n-test-mp-0        NotReady   <none>          3m8s    v1.34.3
-inst-momez-test-mp-0        NotReady   <none>          3m1s    v1.34.3
-test-control-plane-lg2rd    NotReady   control-plane   6m37s   v1.34.3
+inst-gdtie-test-mp-0       NotReady   <none>          4m50s   v1.35.2
+inst-j1f4r-test-mp-0       NotReady   <none>          4m48s   v1.35.2
+test-control-plane-wbrx9   NotReady   control-plane   8m24s   v1.35.2
 ```
 
 ## Install OCI CCM
