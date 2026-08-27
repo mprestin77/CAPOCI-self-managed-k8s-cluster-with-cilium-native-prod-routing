@@ -302,9 +302,7 @@ If a node was not patched successfully, inspect the associated errors in the OCI
 
 ## Install Cilium
 
-Install Cilium only after node `podCIDR`s are assigned. To find the latest Cilium release, see Cilium releases (https://github.com/cilium/cilium/releases). To verify Kubernetes compatibility, check the requirements page for that Cilium major/minor version:
-
-  https://docs.cilium.io/en/v<major.minor>/network/kubernetes/requirements/
+Install Cilium only after node `podCIDR`s are assigned. To find the latest Cilium release, see [Cilium releases](https://github.com/cilium/cilium/releases). To verify Kubernetes compatibility, check the [requirements page for that Cilium major/minor version] (https://docs.cilium.io/en/v<major.minor>/network/kubernetes/requirements/)
 
 In this example, Cilium is installed on all nodes, including the control plane, so the CNI is initialized everywhere. CoreDNS and regular workloads can still remain on worker nodes because the control-plane taint is unchanged.
 
