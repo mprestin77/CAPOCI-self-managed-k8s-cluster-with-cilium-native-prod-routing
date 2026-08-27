@@ -306,7 +306,9 @@ If a node was not patched successfully, inspect the associated errors in the OCI
 
 ## Install Cilium
 
-Install Cilium only after node `podCIDR`s are assigned.
+Install Cilium only after node `podCIDR`s are assigned. To find the latest Cilium release, see Cilium releases (https://github.com/cilium/cilium/releases). To verify Kubernetes compatibility, check the requirements page for that Cilium major/minor version:
+
+  https://docs.cilium.io/en/v<major.minor>/network/kubernetes/requirements/
 
 In this example, Cilium is installed on all nodes, including the control plane, so the CNI is initialized everywhere. CoreDNS and regular workloads can still remain on worker nodes because the control-plane taint is unchanged.
 
@@ -322,7 +324,7 @@ Recommended settings when installing Cilium:
 Install Cilium:
 
 ```bash
-helm upgrade --install cilium cilium/cilium --version 1.19.1 \
+helm upgrade --install cilium cilium/cilium --version 1.20.1 \
   -n kube-system \
   --create-namespace \
   --set routingMode=native \
@@ -359,16 +361,15 @@ Check nodes:
 
 ```bash
 kubectl get nodes -o wide
-kubectl get nodes -o jsonpath='{range .items[*]}{.metadata.name}{"  podCIDR="}{.spec.podCIDR}{"\n"}{end}'
 ```
 
 Example:
 
 ```text
-NAME                       STATUS   ROLES           AGE     VERSION   INTERNAL-IP   EXTERNAL-IP   OS-IMAGE             KERNEL-VERSION      CONTAINER-RUNTIME
-inst-1vn9n-test-mp-0       Ready    <none>          35m     v1.34.3   10.0.52.141   <none>        Ubuntu 22.04.5 LTS   6.8.0-1047-oracle   containerd://1.7.29
-inst-momez-test-mp-0       Ready    <none>          35m     v1.34.3   10.0.61.14    <none>        Ubuntu 22.04.5 LTS   6.8.0-1047-oracle   containerd://1.7.29
-test-control-plane-lg2rd   Ready    control-plane   38m     v1.34.3   10.0.42.72    <none>        Ubuntu 22.04.5 LTS   6.8.0-1047-oracle   containerd://1.7.29
+NAME                       STATUS   ROLES           AGE   VERSION   INTERNAL-IP   EXTERNAL-IP   OS-IMAGE             KERNEL-VERSION      CONTAINER-RUNTIME
+inst-gdtie-test-mp-0       Ready    <none>          20h   v1.35.2   10.0.49.204   <none>        Ubuntu 22.04.5 LTS   6.8.0-1060-oracle   containerd://1.7.29
+inst-j1f4r-test-mp-0       Ready    <none>          20h   v1.35.2   10.0.44.45    <none>        Ubuntu 22.04.5 LTS   6.8.0-1060-oracle   containerd://1.7.29
+test-control-plane-hgrpx   Ready    control-plane   17h   v1.35.2   10.0.34.146   <none>        Ubuntu 22.04.5 LTS   6.8.0-1060-oracle   containerd://1.7.29
 ```
 
 Check CoreDNS:
@@ -380,8 +381,8 @@ kubectl -n kube-system get pods -o wide | grep coredns
 Example:
 
 ```text
-coredns-66bc5c9577-5cfvn   1/1   Running   0   26m   10.0.103.130   inst-1vn9n-test-mp-0   <none>   <none>
-coredns-66bc5c9577-kskqr   1/1   Running   0   26m   10.0.103.131   inst-1vn9n-test-mp-0   <none>   <none>
+coredns-7d764666f9-j84pl                           1/1     Running   0          20h    10.0.101.215   test-control-plane-hgrpx   <none>           <none>
+coredns-7d764666f9-tjrj5                           1/1     Running   0          20h    10.0.101.222   test-control-plane-hgrpx   <none>           <none>
 ```
 
 ## Summary
