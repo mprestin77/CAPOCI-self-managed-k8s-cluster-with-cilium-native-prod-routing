@@ -64,7 +64,9 @@ spec:
           certSANs:
             - "127.0.0.1"
             - "localhost"
-        controllerManager: {}
+        controllerManager:
+          extraArgs:
+            cloud-provider: external
         scheduler: {}
         dns: {}
         etcd: {}
