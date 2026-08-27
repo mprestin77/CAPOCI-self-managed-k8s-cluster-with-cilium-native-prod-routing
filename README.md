@@ -194,8 +194,6 @@ test-control-plane-wbrx9   NotReady   control-plane   8m24s   v1.35.2
 
 The nodes are configured with `cloud-provider: external`, so OCI CCM must be installed before the cluster becomes fully initialized.
 
-Note: OCI FlexCIDR provider was included in OCI CCM `v1.33.1-rc3`. It is expected to be merged into a regular OCI CCM release in the future, but at the time of writing you need to use the release-candidate image from `ghcr.io/akarshes/cloud-provider-oci-amd64:v1.33.1-rc3`.
-
 The `cluster-template.yaml` in this repo already sets `flexcidr-primary-vnic` for both worker and control-plane nodes, so no separate instance-metadata update is needed before installing OCI CCM. Make sure `OCI_CONTROL_PLANE_CIDR_BLOCKS`, `OCI_CONTROL_PLANE_IP_COUNT`, `OCI_MACHINE_POOL_CIDR_BLOCKS`, and `OCI_MACHINE_POOL_IP_COUNT` are set correctly before you generate and apply `rendered.yaml`.
 
 Download the upstream OCI CCM provider-config template and save it locally as `cloud-provider.yaml`:
