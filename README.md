@@ -201,7 +201,9 @@ The `cluster-template.yaml` in this repo already sets `flexcidr-primary-vnic` fo
 Download the upstream OCI CCM provider-config template and save it locally as `cloud-provider.yaml`:
 
 ```bash
-curl -L https://raw.githubusercontent.com/oracle/oci-cloud-controller-manager/master/manifests/provider-config-example.yaml -o cloud-provider.yaml
+export RELEASE=v1.35.0
+
+curl -L https://raw.githubusercontent.com/oracle/oci-cloud-controller-manager/${RELEASE}/manifests/provider-config-example.yaml -o provider-config.yaml
 ```
 
 Then update `cloud-provider.yaml` for your environment. For this guide, set `useInstancePrincipals: true` and customize the OCIDs for `compartment`, `vcn`, `loadBalancer.subnet1`, and `loadBalancer.subnet2`. If you are explicitly managing security lists through the OCI CCM config, also populate the `securityLists` mapping with your subnet and security list OCIDs.
@@ -219,14 +221,8 @@ Then install OCI CCM.
 Download the manifests from the upstream repository:
 
 ```bash
-curl -L https://raw.githubusercontent.com/oracle/oci-cloud-controller-manager/master/manifests/cloud-controller-manager/oci-cloud-controller-manager.yaml -o oci-cloud-controller-manager.yaml
-curl -L https://raw.githubusercontent.com/oracle/oci-cloud-controller-manager/master/manifests/cloud-controller-manager/oci-cloud-controller-manager-rbac.yaml -o oci-cloud-controller-manager-rbac.yaml
-```
-
-Update the controller image in `oci-cloud-controller-manager.yaml`:
-
-```yaml
-image: ghcr.io/akarshes/cloud-provider-oci-amd64:v1.33.1-rc3
+curl -L https://raw.githubusercontent.com/oracle/oci-cloud-controller-manager/${RELEASE}/manifests/cloud-controller-manager/oci-cloud-controller-manager.yaml -o oci-cloud-controller-manager.yaml
+curl -L https://raw.githubusercontent.com/oracle/oci-cloud-controller-manager/${RELEASE}/manifests/cloud-controller-manager/oci-cloud-controller-manager-rbac.yaml -o oci-cloud-controller-manager-rbac.yaml
 ```
 
 Enable the FlexCIDR provider in the OCI CCM configuration. In `oci-cloud-controller-manager.yaml`, set:
